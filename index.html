@@ -3,12 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edius 11 Official Certificate | Studio Line India</title>
+    <title>Edius Official Certificate System | Studio Line India</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
     <style>
+
+/* ক্যালেন্ডার আইকন সাদা এবং বড় করার জন্য */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    width: 20px;  /* আইকনটি বড় করার জন্য */
+    height: 20px; /* আইকনটি বড় করার জন্য */
+}
         :root {
             --gold: #d4af37;
             --dark-gold: #996515;
@@ -35,7 +43,7 @@
 
         .input-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -138,15 +146,21 @@
 <body>
 
 <div class="admin-panel">
-    <h2 style="color:var(--gold); margin-top:0; font-family:'Cinzel';">STUDIO LINE INDIA | CERTIFICATE SYSTEM</h2>
+    <h2 style="color:var(--gold); margin-top:0; font-family:'Cinzel'; text-align: center;">ADMIN STUDIO LINE INDIA | EDIUS CERTIFICATE </h2>
     <div class="input-grid">
         <input type="text" id="inName" placeholder="Full Name">
-        <input type="text" id="inKey" placeholder="Serial Key">
+        <input type="text" id="inContact" placeholder="Contact No">
+        <select id="inIDType">
+            <option value="Aadhaar Card">Aadhaar Card</option>
+            <option value="Voter ID">Voter ID</option>
+            <option value="PAN Card">PAN Card</option>
+        </select>
         <select id="edVer">
             <option value="EDIUS 11 Pro Personal for India">EDIUS 11 Pro Personal for India</option>
             <option value="EDIUS 11 Pro Jump Upgrade">EDIUS 11 Pro Jump Upgrade</option>
+            <option value="EDIUS X Pro Personal">EDIUS X Pro Personal</option>
         </select>
-        <input type="text" id="idNo" placeholder="ID Number (e.g. Aadhaar)">
+        <input type="text" id="inKey" placeholder="Serial Key">
         <input type="date" id="inDate">
         <div style="color: var(--gold); font-size: 12px;">
             <span>UPLOAD LOGO:</span>
@@ -154,7 +168,7 @@
         </div>
     </div>
     <div class="btn-group">
-        <button class="btn btn-gen" onclick="makeCert()">Generate & Save</button>
+        <button class="btn btn-gen" onclick="makeCert()">Generate & Save Online</button>
         <button id="dlBtn" class="btn btn-dl" onclick="savePDF()">Download Official PDF</button>
     </div>
 </div>
@@ -167,7 +181,7 @@
 
     <div class="content-box">
         <div class="header-section">
-            <img src="https://www.ediusworld.com/wp/wp-content/uploads/2023/09/EDIUS-11_256.png" crossorigin="anonymous" class="edius-brand">
+            <img src="" crossorigin="anonymous" class="edius-brand">
             <div class="studio-brand">Studio Line India</div>
         </div>
 
@@ -196,7 +210,8 @@
             </div>
             <div class="meta-box" style="text-align: right;">
                 <b>Registry Details:</b><br>
-                ID: <span id="outID">---</span> | Date: <span id="outDate">---</span><br>
+                Verified ID: <span id="outIDType">---</span><br>
+                Contact: <span id="outContact">---</span> | Date: <span id="outDate">---</span><br>
                 <span id="outKeyDisplay" style="font-weight:bold; color:var(--deep-red);">KEY: XXXX-XXXX</span>
             </div>
         </div>
@@ -204,9 +219,9 @@
 </div>
 
 <div class="db-wrap">
-    <h3>ISSUED CERTIFICATES (ONLINE DATABASE)</h3>
+    <h3>ISSUED DATABASE (FIREBASE)</h3>
     <table>
-        <thead><tr><th>Name</th><th>Key</th><th>Date</th><th>Action</th></tr></thead>
+        <thead><tr><th>Name</th><th>Key</th><th>Contact</th><th>Action</th></tr></thead>
         <tbody id="dbRows"></tbody>
     </table>
 </div>
@@ -229,57 +244,66 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let allCertificates = [];
-let selectedLogoBase64 = "";
+// পেজ লোড হওয়ার সময় সেভ করা লোগো চেক করা
+let selectedLogoBase64 = localStorage.getItem('saved_logo_v1') || "";
 
-// লোগো সিলেকশন এবং সেভ করার জন্য Base64 এ রূপান্তর
+// যদি আগে লোগো সেভ থাকে তবে সেটি ডিসপ্লে করা
+if(selectedLogoBase64) {
+    document.getElementById('display-user-logo').src = selectedLogoBase64;
+}
+
 window.previewLogo = function(event) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function() {
             selectedLogoBase64 = reader.result;
+            // ব্রাউজারে লোগোটি স্থায়ীভাবে সেভ রাখা
+            localStorage.setItem('saved_logo_v1', selectedLogoBase64);
             document.getElementById('display-user-logo').src = reader.result;
         }
         reader.readAsDataURL(file);
     }
 }
 
-// সার্টিফিকেট জেনারেট এবং Firebase এ লোগোসহ সেভ করা
 window.makeCert = function() {
     const data = {
         name: document.getElementById('inName').value,
-        key: document.getElementById('inKey').value,
+        contact: document.getElementById('inContact').value,
+        idType: document.getElementById('inIDType').value,
         ver: document.getElementById('edVer').value,
-        id: document.getElementById('idNo').value,
+        key: document.getElementById('inKey').value,
         date: document.getElementById('inDate').value,
-        logo: selectedLogoBase64 // এখানে আপনার সিলেক্ট করা ইমেজটি স্ট্রিং হিসেবে সেভ হবে
+        logo: selectedLogoBase64
     };
 
-    if(!data.name || !data.key) return alert("Please enter Name and Key!");
+    if(!data.name || !data.key) return alert("Name and Key are mandatory!");
 
-    // Firebase এ পাঠানো
     const certRef = ref(db, 'certificates');
     const newCertRef = push(certRef);
     set(newCertRef, data).then(() => {
-        alert("Certificate Generated and Saved Online!");
+        alert("Saved to Online Database!");
         showOnCanvas(data);
-    }).catch(err => alert("Error saving: " + err.message));
+    }).catch(err => alert("Error: " + err.message));
 }
 
-// ক্যানভাসে ডেটা দেখানো
 function showOnCanvas(item) {
     document.getElementById('outName').innerText = item.name;
     document.getElementById('outVer').innerText = item.ver;
-    document.getElementById('outID').innerText = item.id;
+    document.getElementById('outIDType').innerText = item.idType;
+    document.getElementById('outContact').innerText = item.contact;
     document.getElementById('outDate').innerText = item.date;
-    document.getElementById('outKeyDisplay').innerText = "KEY: " + item.key;
-    if(item.logo) document.getElementById('display-user-logo').src = item.logo;
+    document.getElementById('outKeyDisplay').innerText = "REDEEM CODE : " + item.key;
+    
+    // ডাটাবেস থেকে আসা লোগো অথবা কারেন্ট লোগো দেখানো
+    if(item.logo) {
+        document.getElementById('display-user-logo').src = item.logo;
+    }
     
     document.getElementById('cert-canvas').style.display = 'block';
     document.getElementById('dlBtn').style.display = 'block';
 }
 
-// ডাটাবেস থেকে রিয়েলটাইম ডেটা পড়া এবং টেবিল তৈরি
 const certsRef = ref(db, 'certificates');
 onValue(certsRef, (snapshot) => {
     const data = snapshot.val();
@@ -295,7 +319,7 @@ onValue(certsRef, (snapshot) => {
             tr.innerHTML = `
                 <td>${item.name}</td>
                 <td>${item.key}</td>
-                <td>${item.date}</td>
+                <td>${item.contact}</td>
                 <td><button onclick="viewFromDB('${item.key}')">View</button></td>
             `;
             rows.appendChild(tr);
