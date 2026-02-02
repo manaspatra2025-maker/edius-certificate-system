@@ -57,7 +57,6 @@
         .btn-gen { background: var(--gold); color: #000; }
         .btn-dl { background: #fff; color: #000; display: none; }
 
-        /* --- CERTIFICATE CANVAS --- */
         #cert-canvas {
             width: 1000px;
             height: 700px;
@@ -82,7 +81,7 @@
         .inner-border { position: absolute; top: 30px; left: 30px; right: 30px; bottom: 30px; border: 1px solid var(--gold); z-index: 1; }
 
         .content-box {
-            position: relative; z-index: 10; height: 100%; padding: 50px 80px 40px 80px; /* প্যাডিং অ্যাডজাস্ট করা হয়েছে */
+            position: relative; z-index: 10; height: 100%; padding: 50px 80px 40px 80px;
             display: flex; flex-direction: column; align-items: center; text-align: center; box-sizing: border-box;
         }
 
@@ -100,7 +99,6 @@
 
         .description-text { font-size: 15px; line-height: 1.6; max-width: 750px; color: #333; margin: 15px 0; }
 
-        /* User Seal Section */
         .user-seal-wrapper {
             display: flex;
             flex-direction: column;
@@ -118,23 +116,18 @@
             text-transform: uppercase;
         }
 
-        /* --- Footer Information (Authorized & Registry) --- */
         .footer-meta-container {
             width: 100%;
             display: flex;
             justify-content: space-between;
-            margin-top: auto; /* এটি কন্টেন্টকে নিচে ঠেলে দিবে কিন্তু প্যাডিংয়ের কারণে উপরে থাকবে */
-            margin-bottom: 25px; /* নিচের বর্ডার থেকে উপরে তোলার জন্য */
+            margin-top: auto;
+            margin-bottom: 25px;
             border-top: 1px solid #ddd;
             padding-top: 15px;
             text-align: left;
             font-size: 12px;
         }
         .meta-box b { color: var(--deep-red); text-transform: uppercase; font-size: 11px; }
-
-        /* Signature Area */
-        .footer-sig { width: 100%; display: flex; justify-content: space-between; margin-top: 10px; }
-        .sign-area { width: 220px; border-top: 1px solid #000; padding-top: 5px; font-size: 13px; font-weight: 700; text-align: center; }
 
         .db-wrap { max-width: 1000px; margin: 40px auto; background: #1e293b; padding: 20px; border-radius: 12px; }
         table { width: 100%; border-collapse: collapse; color: #ccc; }
@@ -161,7 +154,7 @@
         </div>
     </div>
     <div class="btn-group">
-        <button class="btn btn-gen" onclick="makeCert()">Generate Certificate</button>
+        <button class="btn btn-gen" onclick="makeCert()">Generate & Save</button>
         <button id="dlBtn" class="btn btn-dl" onclick="savePDF()">Download Official PDF</button>
     </div>
 </div>
@@ -174,7 +167,7 @@
 
     <div class="content-box">
         <div class="header-section">
-            <img src="" crossorigin="anonymous" class="edius-brand">
+            <img src="https://www.ediusworld.com/wp/wp-content/uploads/2023/09/EDIUS-11_256.png" crossorigin="anonymous" class="edius-brand">
             <div class="studio-brand">Studio Line India</div>
         </div>
 
@@ -204,94 +197,128 @@
             <div class="meta-box" style="text-align: right;">
                 <b>Registry Details:</b><br>
                 ID: <span id="outID">---</span> | Date: <span id="outDate">---</span><br>
-                <span id="outKey" style="font-weight:bold; color:var(--deep-red);">KEY: XXXX-XXXX</span>
+                <span id="outKeyDisplay" style="font-weight:bold; color:var(--deep-red);">KEY: XXXX-XXXX</span>
             </div>
         </div>
-
+    </div>
+</div>
 
 <div class="db-wrap">
+    <h3>ISSUED CERTIFICATES (ONLINE DATABASE)</h3>
     <table>
         <thead><tr><th>Name</th><th>Key</th><th>Date</th><th>Action</th></tr></thead>
         <tbody id="dbRows"></tbody>
     </table>
 </div>
 
-<script>
-    let certData = JSON.parse(localStorage.getItem('studio_db_v7')) || [];
-    let uploadedLogoData = "";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    function previewLogo(event) {
-        const file = event.target.files[0];
+const firebaseConfig = {
+  apiKey: "AIzaSyCzsEtdbMP-bsTSQ7R6nbn5xyTddreRe2Q",
+  authDomain: "edius-certificate.firebaseapp.com",
+  projectId: "edius-certificate",
+  storageBucket: "edius-certificate.firebasestorage.app",
+  messagingSenderId: "93191357980",
+  appId: "1:93191357980:web:d53865237205c03e2801d9",
+  measurementId: "G-Y8RN5XTEBK"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+let allCertificates = [];
+let selectedLogoBase64 = "";
+
+// লোগো সিলেকশন এবং সেভ করার জন্য Base64 এ রূপান্তর
+window.previewLogo = function(event) {
+    const file = event.target.files[0];
+    if (file) {
         const reader = new FileReader();
         reader.onload = function() {
-            uploadedLogoData = reader.result;
+            selectedLogoBase64 = reader.result;
             document.getElementById('display-user-logo').src = reader.result;
         }
         reader.readAsDataURL(file);
     }
+}
 
-    function makeCert() {
-        const data = {
-            name: document.getElementById('inName').value,
-            key: document.getElementById('inKey').value,
-            ver: document.getElementById('edVer').value,
-            id: document.getElementById('idNo').value,
-            date: document.getElementById('inDate').value,
-            logo: uploadedLogoData
-        };
+// সার্টিফিকেট জেনারেট এবং Firebase এ লোগোসহ সেভ করা
+window.makeCert = function() {
+    const data = {
+        name: document.getElementById('inName').value,
+        key: document.getElementById('inKey').value,
+        ver: document.getElementById('edVer').value,
+        id: document.getElementById('idNo').value,
+        date: document.getElementById('inDate').value,
+        logo: selectedLogoBase64 // এখানে আপনার সিলেক্ট করা ইমেজটি স্ট্রিং হিসেবে সেভ হবে
+    };
 
-        if(!data.name || !data.key) return alert("Fill Name and Key!");
+    if(!data.name || !data.key) return alert("Please enter Name and Key!");
 
-        document.getElementById('outName').innerText = data.name;
-        document.getElementById('outVer').innerText = data.ver;
-        document.getElementById('outID').innerText = data.id;
-        document.getElementById('outDate').innerText = data.date;
-        document.getElementById('outKey').innerText = "KEY: " + data.key;
+    // Firebase এ পাঠানো
+    const certRef = ref(db, 'certificates');
+    const newCertRef = push(certRef);
+    set(newCertRef, data).then(() => {
+        alert("Certificate Generated and Saved Online!");
+        showOnCanvas(data);
+    }).catch(err => alert("Error saving: " + err.message));
+}
 
-        document.getElementById('cert-canvas').style.display = 'block';
-        document.getElementById('dlBtn').style.display = 'block';
+// ক্যানভাসে ডেটা দেখানো
+function showOnCanvas(item) {
+    document.getElementById('outName').innerText = item.name;
+    document.getElementById('outVer').innerText = item.ver;
+    document.getElementById('outID').innerText = item.id;
+    document.getElementById('outDate').innerText = item.date;
+    document.getElementById('outKeyDisplay').innerText = "KEY: " + item.key;
+    if(item.logo) document.getElementById('display-user-logo').src = item.logo;
+    
+    document.getElementById('cert-canvas').style.display = 'block';
+    document.getElementById('dlBtn').style.display = 'block';
+}
 
-        certData.push(data);
-        localStorage.setItem('studio_db_v7', JSON.stringify(certData));
-        drawTable();
-    }
+// ডাটাবেস থেকে রিয়েলটাইম ডেটা পড়া এবং টেবিল তৈরি
+const certsRef = ref(db, 'certificates');
+onValue(certsRef, (snapshot) => {
+    const data = snapshot.val();
+    const rows = document.getElementById('dbRows');
+    rows.innerHTML = "";
+    allCertificates = [];
 
-    function drawTable() {
-        document.getElementById('dbRows').innerHTML = certData.map((item, i) => `
-            <tr>
+    if (data) {
+        Object.keys(data).forEach(key => {
+            const item = data[key];
+            allCertificates.push(item);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
                 <td>${item.name}</td>
                 <td>${item.key}</td>
                 <td>${item.date}</td>
-                <td><button onclick="viewRecord(${i})">View</button></td>
-            </tr>
-        `).join('');
+                <td><button onclick="viewFromDB('${item.key}')">View</button></td>
+            `;
+            rows.appendChild(tr);
+        });
     }
+});
 
-    function viewRecord(i) {
-        const item = certData[i];
-        document.getElementById('outName').innerText = item.name;
-        document.getElementById('outVer').innerText = item.ver;
-        document.getElementById('outID').innerText = item.id;
-        document.getElementById('outDate').innerText = item.date;
-        document.getElementById('outKey').innerText = "KEY: " + item.key;
-        if(item.logo) document.getElementById('display-user-logo').src = item.logo;
-        document.getElementById('cert-canvas').style.display = 'block';
-        document.getElementById('dlBtn').style.display = 'block';
-    }
+window.viewFromDB = function(key) {
+    const item = allCertificates.find(c => c.key === key);
+    if(item) showOnCanvas(item);
+}
 
-    function savePDF() {
-        const element = document.getElementById('cert-canvas');
-        const name = document.getElementById('outName').innerText;
-        html2pdf().set({
-            margin: 0,
-            filename: `Cert_${name}.pdf`,
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 3, useCORS: true },
-            jsPDF: { unit: 'px', format: [1000, 700], orientation: 'landscape' }
-        }).from(element).save();
-    }
-
-    drawTable();
+window.savePDF = function() {
+    const element = document.getElementById('cert-canvas');
+    const name = document.getElementById('outName').innerText;
+    html2pdf().set({
+        margin: 0,
+        filename: `EDIUS_Cert_${name}.pdf`,
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 3, useCORS: true },
+        jsPDF: { unit: 'px', format: [1000, 700], orientation: 'landscape' }
+    }).from(element).save();
+}
 </script>
 
 </body>
