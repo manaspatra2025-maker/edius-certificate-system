@@ -1,28 +1,28 @@
 <!DOCTYPE html>
 <html lang="bn">
-        <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=9EvNKrEmIZRI&format=png&color=000000">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edius Official Certificate System | Studio Line India</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=9EvNKrEmIZRI&format=png&color=000000">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
     <style>
-
-/* ক্যালেন্ডার আইকন সাদা এবং বড় করার জন্য */
-input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    cursor: pointer;
-    width: 20px;  /* আইকনটি বড় করার জন্য */
-    height: 20px; /* আইকনটি বড় করার জন্য */
-}
         :root {
             --gold: #d4af37;
             --dark-gold: #996515;
             --deep-red: #800000;
             --soft-bg: #fdfdfd;
+        }
+
+        /* ক্যালেন্ডার আইকন */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
         }
 
         body {
@@ -66,6 +66,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         .btn-gen { background: var(--gold); color: #000; }
         .btn-dl { background: #fff; color: #000; display: none; }
 
+        /* সার্টিফিকেট ক্যানভাস ফিক্সড মাপ */
         #cert-canvas {
             width: 1000px;
             height: 700px;
@@ -90,8 +91,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         .inner-border { position: absolute; top: 30px; left: 30px; right: 30px; bottom: 30px; border: 1px solid var(--gold); z-index: 1; }
 
         .content-box {
-            position: relative; z-index: 10; height: 100%; padding: 50px 80px 40px 80px;
-            display: flex; flex-direction: column; align-items: center; text-align: center; box-sizing: border-box;
+            position: relative; z-index: 10; height: 100%; 
+            padding: 40px 80px; /* প্যাডিং কমানো হয়েছে যাতে কন্টেন্ট নিচে না নামে */
+            display: flex; flex-direction: column; align-items: center; 
+            text-align: center; box-sizing: border-box;
         }
 
         .header-section { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
@@ -102,39 +105,25 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         .title-sub { font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: var(--dark-gold); margin-bottom: 10px; font-weight: 600; }
 
         .name-display {
-            font-family: 'Great Vibes', cursive; font-size: 65px; color: var(--deep-red);
+            font-family: 'Great Vibes', cursive; font-size: 60px; color: var(--deep-red);
             margin: 5px 0; padding: 0 40px; border-bottom: 1.5px solid var(--gold); display: inline-block;
         }
 
         .description-text { font-size: 15px; line-height: 1.6; max-width: 750px; color: #333; margin: 15px 0; }
 
         .user-seal-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 5px 0;
+            display: flex; flex-direction: column; align-items: center; margin: 5px 0;
         }
-        #display-user-logo { width: 100px; height: 100px; object-fit: contain; }
+        #display-user-logo { width: 90px; height: 90px; object-fit: contain; }
         .seal-label {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 800;
-            font-size: 14px;
-            color: #000;
-            margin-top: 5px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 13px;
+            color: #000; margin-top: 5px; letter-spacing: 1px; text-transform: uppercase;
         }
 
         .footer-meta-container {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            margin-top: auto;
-            margin-bottom: 25px;
-            border-top: 1px solid #ddd;
-            padding-top: 15px;
-            text-align: left;
-            font-size: 12px;
+            width: 100%; display: flex; justify-content: space-between;
+            margin-top: auto; padding-bottom: 20px; border-top: 1px solid #ddd;
+            padding-top: 15px; text-align: left; font-size: 12px;
         }
         .meta-box b { color: var(--deep-red); text-transform: uppercase; font-size: 11px; }
 
@@ -182,7 +171,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
     <div class="content-box">
         <div class="header-section">
-            <img src="" crossorigin="anonymous" class="edius-brand">
+            <img src="https://www.ediusworld.com/wp/wp-content/uploads/2023/09/EDIUS-11_256.png" crossorigin="anonymous" class="edius-brand">
             <div class="studio-brand">Studio Line India</div>
         </div>
 
@@ -245,10 +234,8 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let allCertificates = [];
-// পেজ লোড হওয়ার সময় সেভ করা লোগো চেক করা
 let selectedLogoBase64 = localStorage.getItem('saved_logo_v1') || "";
 
-// যদি আগে লোগো সেভ থাকে তবে সেটি ডিসপ্লে করা
 if(selectedLogoBase64) {
     document.getElementById('display-user-logo').src = selectedLogoBase64;
 }
@@ -259,7 +246,6 @@ window.previewLogo = function(event) {
         const reader = new FileReader();
         reader.onload = function() {
             selectedLogoBase64 = reader.result;
-            // ব্রাউজারে লোগোটি স্থায়ীভাবে সেভ রাখা
             localStorage.setItem('saved_logo_v1', selectedLogoBase64);
             document.getElementById('display-user-logo').src = reader.result;
         }
@@ -296,7 +282,6 @@ function showOnCanvas(item) {
     document.getElementById('outDate').innerText = item.date;
     document.getElementById('outKeyDisplay').innerText = "REDEEM CODE : " + item.key;
     
-    // ডাটাবেস থেকে আসা লোগো অথবা কারেন্ট লোগো দেখানো
     if(item.logo) {
         document.getElementById('display-user-logo').src = item.logo;
     }
@@ -336,16 +321,24 @@ window.viewFromDB = function(key) {
 window.savePDF = function() {
     const element = document.getElementById('cert-canvas');
     const name = document.getElementById('outName').innerText;
-    html2pdf().set({
+    
+    // PDF জেনারেশনের সময় মার্জিন এবং স্কেল ফিক্স করা হয়েছে
+    const opt = {
         margin: 0,
         filename: `EDIUS_Cert_${name}.pdf`,
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 3, useCORS: true },
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true,
+            scrollY: 0,
+            scrollX: 0
+        },
         jsPDF: { unit: 'px', format: [1000, 700], orientation: 'landscape' }
-    }).from(element).save();
+    };
+
+    html2pdf().set(opt).from(element).save();
 }
 </script>
 
 </body>
 </html>
-
