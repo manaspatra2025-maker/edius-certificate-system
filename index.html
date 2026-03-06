@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EDIUS Ultra Pro Hub | Studio Line India</title>
-        <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=9EvNKrEmIZRI&format=png&color=000000">
-    
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=9EvNKrEmIZRI&format=png&color=000000">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@400;700;900&family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
@@ -31,6 +30,28 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             font-family: 'Montserrat', sans-serif;
             margin: 0; padding: 20px; color: #fff;
         }
+
+
+/* Custom Professional Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none; align-items: center; justify-content: center;
+    z-index: 9999; backdrop-filter: blur(5px);
+}
+.modal-box {
+    background: #1e293b;
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid var(--gold);
+    text-align: center;
+    width: 350px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.modal-box h3 { color: var(--gold); margin-top: 0; font-family: 'Cinzel'; }
+.modal-box input { width: 80%; margin: 15px 0; text-align: center; border: 1px solid #334155; }
+.modal-btns { display: flex; gap: 10px; }
 
         /* Luxury Admin Panel */
         .admin-panel {
@@ -147,10 +168,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             <option value="EDIUS X Pro Full Version">EDIUS X Pro</option>
         </select>
         <input type="date" id="inDate">
-        <div style="font-size: 11px; color: var(--gold);">
-            <span>UPLOAD CLIENT LOGO:</span><br>
-            <input type="file" id="logoUpload" accept="image/*" onchange="previewLogo(event)">
-        </div>
     </div>
     <div class="btn-group">
         <button class="btn btn-gen" onclick="generateUltimate()">Generate & Secure Save</button>
@@ -192,6 +209,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
                 <b>Reg. Date:</b> <span id="outDate">2026-03-06</span><br>
                 <b>Status:</b> <span style="color: green; font-weight: bold;">VERIFIED</span>
             </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>Delete Edius Certificate</h3>
+        <p style="font-size: 14px; color: #ccc;">Enter Administrator Password</p>
+        <input type="password" id="passInput" placeholder="••••••••">
+        <div class="modal-btns">
+            <button class="btn btn-gen" id="confirmDelBtn">Verify</button>
+            <button class="btn" style="background:#444; color:#fff;" onclick="closeModal()">Cancel</button>
         </div>
     </div>
 </div>
@@ -291,9 +321,35 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         onValue(ref(db, `certificates/${id}`), (s) => renderCert(s.val()), {onlyOnce: true});
     }
 
-    window.deleteEntry = function(id) {
-        if(confirm("Confirm: Delete this record permanently?")) remove(ref(db, `certificates/${id}`));
+let currentDeleteId = null;
+
+window.deleteEntry = function(id) {
+    currentDeleteId = id;
+    document.getElementById('deleteModal').style.display = 'flex';
+    document.getElementById('passInput').value = '';
+    document.getElementById('passInput').focus();
+}
+
+window.closeModal = function() {
+    document.getElementById('deleteModal').style.display = 'none';
+}
+
+document.getElementById('confirmDelBtn').onclick = function() {
+    const pass = document.getElementById('passInput').value;
+    
+    if (pass === "Manas@4321") {
+        if (confirm("Action is irreversible. Confirm deletion?")) {
+            remove(ref(db, `certificates/${currentDeleteId}`))
+                .then(() => {
+                    alert("System Updated: Record Purged.");
+                    closeModal();
+                })
+                .catch((err) => alert("System Error: " + err.message));
+        }
+    } else {
+        alert("Access Denied: Invalid Administrative Password.");
     }
+}
 
     window.filterRegistry = function() {
         let val = document.getElementById('dbSearch').value.toLowerCase();
@@ -327,4 +383,3 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 </body>
 </html>
-
