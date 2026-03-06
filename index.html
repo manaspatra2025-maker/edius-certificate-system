@@ -3,341 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edius Official Certificate System | Studio Line India</title>
-    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=9EvNKrEmIZRI&format=png&color=000000">
+    <title>EDIUS Ultra Pro Hub | Studio Line India</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@400;700;900&family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --gold: #d4af37;
-            --dark-gold: #996515;
-            --deep-red: #800000;
-            --soft-bg: #fdfdfd;
-        }
 
-        /* ক্যালেন্ডার আইকন */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
-            width: 20px;
-            height: 20px;
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(100%);
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px;
+}
+
+        :root {
+            --gold: #c5a059;
+            --dark-blue: #0f172a;
+            --navy-blue: #1e293b;
+            --deep-red: #800000;
         }
 
         body {
-            background-color: #0f172a;
+            background: radial-gradient(circle at top, #1e293b 0%, #080c14 100%);
             font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            padding: 20px;
-            color: #eee;
+            margin: 0; padding: 20px; color: #fff;
         }
 
+        /* Luxury Admin Panel */
         .admin-panel {
-            max-width: 1000px;
-            margin: 0 auto 30px;
-            background: #1e293b;
-            padding: 25px;
-            border-radius: 15px;
-            border: 1px solid var(--gold);
+            max-width: 1100px; margin: 0 auto 40px;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(15px);
+            padding: 30px; border-radius: 25px;
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
         .input-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 15px; margin-bottom: 25px;
         }
 
         input, select {
-            background: #0f172a;
+            background: rgba(15, 23, 42, 0.9);
             border: 1px solid #334155;
-            padding: 12px;
-            border-radius: 8px;
-            color: #fff;
-            outline: none;
+            padding: 14px; border-radius: 12px;
+            color: #fff; outline: none; transition: 0.3s;
         }
 
-        .btn-group { display: flex; gap: 10px; }
+        input:focus { border-color: var(--gold); box-shadow: 0 0 15px rgba(197, 160, 89, 0.3); }
+
+        .btn-group { display: flex; gap: 15px; }
         .btn {
-            flex: 1; padding: 15px; border: none; border-radius: 8px;
-            font-weight: bold; cursor: pointer; text-transform: uppercase;
+            flex: 1; padding: 16px; border: none; border-radius: 12px;
+            font-weight: 700; cursor: pointer; text-transform: uppercase; transition: 0.4s;
         }
-        .btn-gen { background: var(--gold); color: #000; }
+        .btn-gen { background: linear-gradient(135deg, var(--gold), #996515); color: #000; }
+        .btn-gen:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(197, 160, 89, 0.4); }
         .btn-dl { background: #fff; color: #000; display: none; }
 
-        /* সার্টিফিকেট ক্যানভাস ফিক্সড মাপ */
+        /* Luxury Certificate Canvas */
         #cert-canvas {
-            width: 1000px;
-            height: 700px;
-            background: var(--soft-bg);
-            margin: 0 auto;
-            position: relative;
-            overflow: hidden;
-            display: none;
-            box-shadow: 0 0 60px rgba(0,0,0,0.8);
-            color: #111;
+            width: 1050px; height: 750px;
+            background: #fff; color: #111;
+            margin: 0 auto; position: relative;
+            display: none; overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.8);
         }
 
-        .corner-ribbon {
-            position: absolute; width: 350px; height: 45px;
-            background: linear-gradient(45deg, var(--dark-gold), var(--gold), var(--dark-gold));
-            z-index: 5;
-        }
-        .top-left { top: 40px; left: -100px; transform: rotate(-45deg); }
-        .bottom-right { bottom: 40px; right: -100px; transform: rotate(-45deg); }
-
-        .outer-border { position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px; border: 2px solid var(--gold); z-index: 1; }
-        .inner-border { position: absolute; top: 30px; left: 30px; right: 30px; bottom: 30px; border: 1px solid var(--gold); z-index: 1; }
-
-        .content-box {
-            position: relative; z-index: 10; height: 100%; 
-            padding: 40px 80px; /* প্যাডিং কমানো হয়েছে যাতে কন্টেন্ট নিচে না নামে */
-            display: flex; flex-direction: column; align-items: center; 
-            text-align: center; box-sizing: border-box;
+        #cert-canvas::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+            opacity: 0.05; pointer-events: none;
         }
 
-        .header-section { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .edius-brand { height: 65px; object-fit: contain; } 
-        .studio-brand { font-family: 'Cinzel', serif; font-size: 24px; color: var(--deep-red); font-weight: 700; }
-
-        .title-main { font-family: 'Cinzel', serif; font-size: 55px; margin: 5px 0; letter-spacing: 5px; color: #000; }
-        .title-sub { font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: var(--dark-gold); margin-bottom: 10px; font-weight: 600; }
-
-        .name-display {
-            font-family: 'Great Vibes', cursive; font-size: 60px; color: var(--deep-red);
-            margin: 5px 0; padding: 0 40px; border-bottom: 1.5px solid var(--gold); display: inline-block;
+        .border-main {
+            position: absolute; top: 30px; left: 30px; right: 30px; bottom: 30px;
+            border: 10px double var(--gold); z-index: 2;
         }
 
-        .description-text { font-size: 15px; line-height: 1.6; max-width: 750px; color: #333; margin: 15px 0; }
-
-        .user-seal-wrapper {
-            display: flex; flex-direction: column; align-items: center; margin: 5px 0;
+        .corner-element {
+            position: absolute; width: 150px; height: 150px;
+            border: 15px solid var(--gold); z-index: 3;
         }
-        #display-user-logo { width: 90px; height: 90px; object-fit: contain; }
-        .seal-label {
-            font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 13px;
-            color: #000; margin-top: 5px; letter-spacing: 1px; text-transform: uppercase;
+        .tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+        .br { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+        .content {
+            position: relative; z-index: 10; height: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 60px 100px 40px; /* প্যাডিং অ্যাডজাস্ট করা হয়েছে */
+            box-sizing: border-box; text-align: center;
         }
 
-        .footer-meta-container {
-            width: 100%; display: flex; justify-content: space-between;
-            margin-top: auto; padding-bottom: 20px; border-top: 1px solid #ddd;
-            padding-top: 15px; text-align: left; font-size: 12px;
+        .cert-header { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        .cert-title { font-family: 'Cinzel'; font-size: 65px; font-weight: 900; margin: 10px 0; color: #1a1a1a; letter-spacing: 10px; }
+        
+        .name-field {
+            font-family: 'Great Vibes', cursive; font-size: 80px;
+            color: var(--deep-red); margin: 10px 0;
+            border-bottom: 2px solid var(--gold); padding: 0 60px;
         }
-        .meta-box b { color: var(--deep-red); text-transform: uppercase; font-size: 11px; }
 
-        .db-wrap { max-width: 1000px; margin: 40px auto; background: #1e293b; padding: 20px; border-radius: 12px; }
-        table { width: 100%; border-collapse: collapse; color: #ccc; }
-        th { text-align: left; color: var(--gold); border-bottom: 2px solid #334155; padding: 10px; }
-        td { padding: 10px; border-bottom: 1px solid #334155; }
+        .cert-footer {
+            margin-top: auto; 
+            width: 100%;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding-bottom: 30px; /* নিচ থেকে উপরে উঠানো হয়েছে */
+        }
+
+        #qrcode { background: #fff; padding: 5px; border: 1px solid #ddd; }
+
+        /* Database Registry */
+        .db-wrap {
+            max-width: 1100px; margin: 50px auto;
+            background: rgba(30, 41, 59, 0.4); padding: 25px; border-radius: 20px;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { color: var(--gold); text-align: left; padding: 15px; border-bottom: 2px solid #334155; }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .action-btn { padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; font-size: 12px; font-weight: bold; margin-right: 5px; }
+        .btn-view { background: var(--gold); color: #000; }
+        .btn-del { background: #ff4444; color: #fff; }
+
+        .search-bar { width: 97%; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
 <div class="admin-panel">
-    <h2 style="color:var(--gold); margin-top:0; font-family:'Cinzel'; text-align: center;">ADMIN STUDIO LINE INDIA | EDIUS CERTIFICATE </h2>
+    <h2 style="text-align:center; font-family:'Cinzel'; color:var(--gold); letter-spacing:3px; margin-top:0;">STUDIO LINE INDIA | EDIUS ULTIMATE HUB</h2>
     <div class="input-grid">
-        <input type="text" id="inName" placeholder="Full Name">
-        <input type="text" id="inContact" placeholder="Contact No">
-        <select id="inIDType">
-            <option value="Aadhaar Card">Aadhaar Card</option>
-            <option value="Voter ID">Voter ID</option>
-            <option value="PAN Card">PAN Card</option>
-        </select>
+        <input type="text" id="inName" placeholder="Customer Name">
+        <input type="text" id="inKey" placeholder="Edius Redeem Code">
+        <input type="text" id="inContact" placeholder="Contact/WhatsApp">
         <select id="edVer">
-            <option value="EDIUS 11 Pro Personal for India">EDIUS 11 Pro Personal for India</option>
-            <option value="EDIUS 11 Pro Jump Upgrade">EDIUS 11 Pro Jump Upgrade</option>
-            <option value="EDIUS X Pro Personal">EDIUS X Pro Personal</option>
+            <option value="EDIUS 11 Pro Personal (India Edition)">EDIUS 11 Pro Personal</option>
+            <option value="EDIUS 11 Pro Jump Upgrade">EDIUS 11 Pro Upgrade</option>
+            <option value="EDIUS X Pro Full Version">EDIUS X Pro</option>
         </select>
-        <input type="text" id="inKey" placeholder="Serial Key">
         <input type="date" id="inDate">
-        <div style="color: var(--gold); font-size: 12px;">
-            <span>UPLOAD LOGO:</span>
+        <div style="font-size: 11px; color: var(--gold);">
+            <span>UPLOAD CLIENT LOGO:</span><br>
             <input type="file" id="logoUpload" accept="image/*" onchange="previewLogo(event)">
         </div>
     </div>
     <div class="btn-group">
-        <button class="btn btn-gen" onclick="makeCert()">Generate & Save Online</button>
-        <button id="dlBtn" class="btn btn-dl" onclick="savePDF()">Download Official PDF</button>
+        <button class="btn btn-gen" onclick="generateUltimate()">Generate & Secure Save</button>
+        <button id="dlBtn" class="btn btn-dl" onclick="savePDF()">Download High-Res PDF</button>
     </div>
 </div>
 
 <div id="cert-canvas">
-    <div class="corner-ribbon top-left"></div>
-    <div class="corner-ribbon bottom-right"></div>
-    <div class="outer-border"></div>
-    <div class="inner-border"></div>
-
-    <div class="content-box">
-        <div class="header-section">
-            <img src="https://www.ediusworld.com/wp/wp-content/uploads/2023/09/EDIUS-11_256.png" crossorigin="anonymous" class="edius-brand">
-            <div class="studio-brand">Studio Line India</div>
+    <div class="border-main"></div>
+    <div class="corner-element tl"></div>
+    <div class="corner-element br"></div>
+    
+    <div class="content">
+        <div class="cert-header">
+            <img src="https://www.ediusworld.com/wp/wp-content/uploads/2023/09/EDIUS-11_256.png" height="80">
+            <div style="font-family: 'Cinzel'; font-weight: 700; font-size: 26px; color: var(--deep-red);">Studio Line India</div>
         </div>
 
-        <h1 class="title-main">CERTIFICATE</h1>
-        <div class="title-sub">OFFICIAL SOFTWARE LICENSE AUTHORITY</div>
+        <h1 class="cert-title">CERTIFICATE</h1>
+        <div style="letter-spacing: 5px; color: #b8962e; font-weight: 700; text-transform: uppercase;">Authentic Software License</div>
 
-        <p style="font-style: italic; color: #555; font-size: 16px; margin: 0;">This document confirms that</p>
-        <div class="name-display" id="outName">Customer Name</div>
+        <p style="margin: 30px 0 0; font-style: italic; color: #666; font-size: 18px;">This is to certify that</p>
+        <div class="name-field" id="outName">Customer Name</div>
 
-        <p class="description-text">
-            Has successfully acquired and registered a genuine license for <b><span id="outVer">EDIUS 11 Pro</span></b>. 
-            This software is verified to be authentic and registered under the official user database of 
-            <b>Studio Line India</b>, providing access to all professional features and official support.
+        <p style="font-size: 16px; line-height: 1.8; color: #333; max-width: 800px;">
+            Has successfully registered a genuine license for <b><span id="outVer">EDIUS 11 Pro</span></b>. 
+            This document confirms the software's authenticity and entitles the holder to full professional 
+            features and official support from <b>Studio Line India</b>.
         </p>
 
-        <div class="user-seal-wrapper">
-            <img id="display-user-logo" src="https://www.ediusworld.com/wp/wp-content/uploads/2023/09/EDIUS-11_256.png" alt="Seal">
-            <div class="seal-label">EDIUS 11 LICENSE USER</div>
-        </div>
-
-        <div class="footer-meta-container">
-            <div class="meta-box">
-                <b>Authorized Reseller:</b><br>
-                Studio Line India | support@studiolineindia.com<br>
-                www.studiolineindia.com | +91 9735216364
+        <div class="cert-footer">
+            <div id="qrcode"></div>
+            <div style="text-align: center;">
+                <img id="display-user-logo" src="https://www.ediusworld.com/wp/wp-content/uploads/2023/09/EDIUS-11_256.png" height="110">
+                <div style="font-weight: 900; letter-spacing: 2px; font-size: 12px; margin-top: 5px;">OFFICIAL SEAL</div>
             </div>
-            <div class="meta-box" style="text-align: right;">
-                <b>Registry Details:</b><br>
-                Verified ID: <span id="outIDType">---</span><br>
-                Contact: <span id="outContact">---</span> | Date: <span id="outDate">---</span><br>
-                <span id="outKeyDisplay" style="font-weight:bold; color:var(--deep-red);">KEY: XXXX-XXXX</span>
+            <div style="text-align: right; font-size: 12px; line-height: 1.6;">
+                <b>License Key:</b> <span id="outKey" style="color: var(--deep-red); font-weight: bold;">XXXX-XXXX</span><br>
+                <b>Reg. Date:</b> <span id="outDate">2026-03-06</span><br>
+                <b>Status:</b> <span style="color: green; font-weight: bold;">VERIFIED</span>
             </div>
         </div>
     </div>
 </div>
 
 <div class="db-wrap">
-    <h3>ISSUED DATABASE (FIREBASE)</h3>
+    <h3 style="color: var(--gold); font-family: 'Cinzel';">LICENSE REGISTRY DATABASE</h3>
+    <input type="text" id="dbSearch" class="search-bar" placeholder="Search by name, key or contact..." onkeyup="filterRegistry()">
     <table>
-        <thead><tr><th>Name</th><th>Key</th><th>Contact</th><th>Action</th></tr></thead>
+        <thead>
+            <tr>
+                <th style="width: 50px;">SL</th>
+                <th>Client Name</th>
+                <th>Edius Redeem Code</th>
+                <th>Contact</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
         <tbody id="dbRows"></tbody>
     </table>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCzsEtdbMP-bsTSQ7R6nbn5xyTddreRe2Q",
-  authDomain: "edius-certificate.firebaseapp.com",
-  projectId: "edius-certificate",
-  storageBucket: "edius-certificate.firebasestorage.app",
-  messagingSenderId: "93191357980",
-  appId: "1:93191357980:web:d53865237205c03e2801d9",
-  measurementId: "G-Y8RN5XTEBK"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-let allCertificates = [];
-let selectedLogoBase64 = localStorage.getItem('saved_logo_v1') || "";
-
-if(selectedLogoBase64) {
-    document.getElementById('display-user-logo').src = selectedLogoBase64;
-}
-
-window.previewLogo = function(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function() {
-            selectedLogoBase64 = reader.result;
-            localStorage.setItem('saved_logo_v1', selectedLogoBase64);
-            document.getElementById('display-user-logo').src = reader.result;
-        }
-        reader.readAsDataURL(file);
-    }
-}
-
-window.makeCert = function() {
-    const data = {
-        name: document.getElementById('inName').value,
-        contact: document.getElementById('inContact').value,
-        idType: document.getElementById('inIDType').value,
-        ver: document.getElementById('edVer').value,
-        key: document.getElementById('inKey').value,
-        date: document.getElementById('inDate').value,
-        logo: selectedLogoBase64
+    const firebaseConfig = {
+        apiKey: "AIzaSyCzsEtdbMP-bsTSQ7R6nbn5xyTddreRe2Q",
+        authDomain: "edius-certificate.firebaseapp.com",
+        projectId: "edius-certificate",
+        storageBucket: "edius-certificate.firebasestorage.app",
+        messagingSenderId: "93191357980",
+        appId: "1:93191357980:web:d53865237205c03e2801d9"
     };
 
-    if(!data.name || !data.key) return alert("Name and Key are mandatory!");
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    const certRef = ref(db, 'certificates');
-    const newCertRef = push(certRef);
-    set(newCertRef, data).then(() => {
-        alert("Saved to Online Database!");
-        showOnCanvas(data);
-    }).catch(err => alert("Error: " + err.message));
-}
+    document.getElementById('inDate').valueAsDate = new Date();
+    let qr = new QRCode(document.getElementById("qrcode"), { width: 90, height: 90 });
 
-function showOnCanvas(item) {
-    document.getElementById('outName').innerText = item.name;
-    document.getElementById('outVer').innerText = item.ver;
-    document.getElementById('outIDType').innerText = item.idType;
-    document.getElementById('outContact').innerText = item.contact;
-    document.getElementById('outDate').innerText = item.date;
-    document.getElementById('outKeyDisplay').innerText = "REDEEM CODE : " + item.key;
-    
-    if(item.logo) {
-        document.getElementById('display-user-logo').src = item.logo;
-    }
-    
-    document.getElementById('cert-canvas').style.display = 'block';
-    document.getElementById('dlBtn').style.display = 'block';
-}
+    window.generateUltimate = function() {
+        const data = {
+            name: document.getElementById('inName').value.trim(),
+            key: document.getElementById('inKey').value.trim(),
+            contact: document.getElementById('inContact').value.trim(),
+            ver: document.getElementById('edVer').value,
+            date: document.getElementById('inDate').value,
+            logo: localStorage.getItem('saved_logo_v1') || ""
+        };
 
-const certsRef = ref(db, 'certificates');
-onValue(certsRef, (snapshot) => {
-    const data = snapshot.val();
-    const rows = document.getElementById('dbRows');
-    rows.innerHTML = "";
-    allCertificates = [];
+        if(!data.name || !data.key) return alert("Error: Name and Key required!");
 
-    if (data) {
-        Object.keys(data).forEach(key => {
-            const item = data[key];
-            allCertificates.push(item);
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${item.name}</td>
-                <td>${item.key}</td>
-                <td>${item.contact}</td>
-                <td><button onclick="viewFromDB('${item.key}')">View</button></td>
-            `;
-            rows.appendChild(tr);
+        const newRef = push(ref(db, 'certificates'));
+        set(newRef, data).then(() => {
+            alert("Success: Cloud Registry Updated!");
+            renderCert(data);
         });
     }
-});
 
-window.viewFromDB = function(key) {
-    const item = allCertificates.find(c => c.key === key);
-    if(item) showOnCanvas(item);
-}
+    function renderCert(item) {
+        document.getElementById('outName').innerText = item.name;
+        document.getElementById('outVer').innerText = item.ver;
+        document.getElementById('outKey').innerText = item.key;
+        document.getElementById('outDate').innerText = item.date;
+        if(item.logo) document.getElementById('display-user-logo').src = item.logo;
+        
+        qr.clear();
+        qr.makeCode("https://www.studiolineindia.com/"); // স্ক্যান করলে ওয়েবসাইট ওপেন হবে
 
-window.savePDF = function() {
-    const element = document.getElementById('cert-canvas');
-    const name = document.getElementById('outName').innerText;
-    
-    // PDF জেনারেশনের সময় মার্জিন এবং স্কেল ফিক্স করা হয়েছে
-    const opt = {
-        margin: 0,
-        filename: `EDIUS_Cert_${name}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-            scale: 2, 
-            useCORS: true,
-            scrollY: 0,
-            scrollX: 0
-        },
-        jsPDF: { unit: 'px', format: [1000, 700], orientation: 'landscape' }
-    };
+        document.getElementById('cert-canvas').style.display = 'block';
+        document.getElementById('dlBtn').style.display = 'block';
+        window.scrollTo({ top: document.getElementById('cert-canvas').offsetTop - 20, behavior: 'smooth' });
+    }
 
-    html2pdf().set(opt).from(element).save();
-}
+    onValue(ref(db, 'certificates'), (snapshot) => {
+        const rows = document.getElementById('dbRows');
+        rows.innerHTML = "";
+        let sl = 1; // সিরিয়াল নাম্বার শুরু
+        snapshot.forEach((child) => {
+            const item = child.val();
+            const id = child.key;
+            rows.innerHTML += `
+                <tr>
+                    <td style="color:var(--gold); font-weight:bold;">${sl++}</td>
+                    <td><b>${item.name}</b></td>
+                    <td><code>${item.key}</code></td>
+                    <td>${item.contact}</td>
+                    <td>
+                        <button class="action-btn btn-view" onclick="loadSingle('${id}')">VIEW</button>
+                        <button class="action-btn btn-del" onclick="deleteEntry('${id}')">DEL</button>
+                    </td>
+                </tr>`;
+        });
+    });
+
+    window.loadSingle = function(id) {
+        onValue(ref(db, `certificates/${id}`), (s) => renderCert(s.val()), {onlyOnce: true});
+    }
+
+    window.deleteEntry = function(id) {
+        if(confirm("Confirm: Delete this record permanently?")) remove(ref(db, `certificates/${id}`));
+    }
+
+    window.filterRegistry = function() {
+        let val = document.getElementById('dbSearch').value.toLowerCase();
+        let trs = document.querySelectorAll('#dbRows tr');
+        trs.forEach(tr => tr.style.display = tr.innerText.toLowerCase().includes(val) ? "" : "none");
+    }
+
+    window.savePDF = function() {
+        const el = document.getElementById('cert-canvas');
+        html2pdf().set({
+            margin: 0,
+            filename: `EDIUS_PRO_CERT_${document.getElementById('outName').innerText}.pdf`,
+            html2canvas: { scale: 3 },
+            jsPDF: { unit: 'px', format: [1050, 750], orientation: 'landscape' }
+        }).from(el).save();
+    }
+
+    // লোগো প্রিভিউ হ্যান্ডলার
+    window.previewLogo = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                localStorage.setItem('saved_logo_v1', reader.result);
+                document.getElementById('display-user-logo').src = reader.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
 </script>
 
 </body>
